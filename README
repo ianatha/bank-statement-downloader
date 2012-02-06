@@ -1,0 +1,17 @@
+# machocfo
+
+A set of Clojure-based command-line utilities to export your data
+from your banks website into a parsable JSON.
+
+Currently Supported institutions:
+- Wells Fargo
+
+## Usage
+
+lein run john_doe password123
+
+## License
+
+Copyright (C) 2012 Ian W. Atha.
+
+Distributed under the Eclipse Public License, the same as Clojure.
