@@ -25,14 +25,11 @@
 	(assert-page-title
 		(.. login-page (getAnchorByText "Statements & Documents") (click))
 		#"Wells Fargo Statements & Documents"))
- 
-(defn get-text-content [node]
-	(.getTextContent node))
 
 (defn statement-years [statements-page]
 	(filter
 		#(re-matches #"(19|2[0-9])[0-9][0-9]" %)
-		(map get-text-content (.getAnchors statements-page))))
+		(map #(.getTextContent %) (.getAnchors statements-page))))
 
 (defn statements-per-year-page [statements-page year]
 	(assert-page-title
@@ -44,7 +41,7 @@
 		#(not (nil? %))
 		(map 
 			#(get (re-matches #"(?s)Statement.*([01][0-9]/[01][0-9]/[0-9][0-9]).*\([0-9]*K\)" %) 1)
-			(map get-text-content (.getAnchors (statements-per-year-page statements-page year))))))
+			(map #(.getTextContent %) (.getAnchors (statements-per-year-page statements-page year))))))
 
 (defn -main [username password]
   (let [
