@@ -55,6 +55,48 @@
 						(.getAnchors year-page)))))
 		] (.getInputStream (pdf-statement-page))))
 
+(defn pdf-statement-to-lines [pdf-statement-inputstream]
+	(let [
+		reader (new com.itextpdf.text.pdf.PdfReader pdf-statement-inputstream)
+		; for (int i = 1; i <= reader.getNumberOfPages(); i++) {
+		; System.out.println(format("<page n=\"%d\">",i));
+		; final List<TextRenderInfo> texts = Lists.newArrayList();
+
+		; RenderListener listener = new RenderListener() {
+		; 	public void renderText(TextRenderInfo arg0) {
+		; 		if (arg0.getText().length() > 1) { texts.add(arg0); }
+		; 	}
+
+		; 	public void renderImage(ImageRenderInfo arg0) {}
+		; 	public void endTextBlock() {}
+		; 	public void beginTextBlock() {}
+		; };
+		; PdfContentStreamProcessor processor = new PdfContentStreamProcessor(listener);
+		; PdfDictionary resourcesDictionary = reader.getPageN(i).getAsDict(PdfName.RESOURCES);
+		; processor.processContent(ContentByteUtils.getContentBytesForPage(reader, i), resourcesDictionary);
+		; return lines
+		; Multimap<Float, TextRenderInfo> b = Multimaps.index(texts, new Function<TextRenderInfo, Float>() {
+		; 	public Float apply(TextRenderInfo arg0) {
+		; 		return arg0.getBaseline().getBoundingRectange().y;
+		; 	}
+		; });
+
+		; for (Float lineY : Ordering.natural().reverse().sortedCopy(b.keySet())) {
+		; 	Ordering<TextRenderInfo> xordering = new Ordering<TextRenderInfo>() {
+		; 		@Override
+		; 		public int compare(TextRenderInfo arg0, TextRenderInfo arg1) {
+		; 			return Ordering.natural().compare(arg1.getBaseline().getBoundingRectange().x,
+		; 			    arg1.getBaseline().getBoundingRectange().x);
+		; 		}
+
+		; 	};
+		; 	for (TextRenderInfo text : xordering.sortedCopy(b.get(lineY))) {
+		; 		System.out.print(text.getText() + " ");
+		; 	}
+		; 	System.out.println();
+		; }		
+		] reader))
+
 (defn -main [username password]
   (let [
 	  login-page (login-page username password)
