@@ -4,4 +4,5 @@
   :dependencies [
   	[org.clojure/clojure "1.2.1"]
   	[com.itextpdf/itextpdf "5.1.3"]
-  	[net.sourceforge.htmlunit/htmlunit "2.9"]])
+  	[net.sourceforge.htmlunit/htmlunit "2.9"]
+  	[com.google.guava/guava "11.0.1"]])

@@ -1,4 +1,9 @@
-(ns machocfo.wells-fargo)
+(ns machocfo.wells-fargo
+	(:import
+		(com.itextpdf.text.pdf.parser TextRenderInfo RenderListener PdfContentStreamProcessor ContentByteUtils)
+		(com.itextpdf.text.pdf PdfName)
+		(com.google.common.collect Multimaps)
+		(com.google.common.base Function)))
 
 (def web-client
 	(doto
@@ -55,47 +60,49 @@
 						(.getAnchors year-page)))))
 		] (.getInputStream (pdf-statement-page))))
 
-(defn pdf-statement-to-lines [pdf-statement-inputstream]
+(defn pdf-statement-to-text-chunks [pdf-statement-inputstream]
 	(let [
 		reader (new com.itextpdf.text.pdf.PdfReader pdf-statement-inputstream)
-		; for (int i = 1; i <= reader.getNumberOfPages(); i++) {
-		; System.out.println(format("<page n=\"%d\">",i));
-		; final List<TextRenderInfo> texts = Lists.newArrayList();
+		pages (range 1 (inc (.getNumberOfPages reader)))
+		page-to-chunks (fn [page]
+			(let [
+				chunks (new java.util.ArrayList)
+				listener (proxy [RenderListener] []
+								(renderText [#^TextRenderInfo chunk] (. chunks add chunk))
+								(beginTextBlock nil)
+								(endTextBlock nil)
+								(renderImage [#^ImageRenderInfo chunk] nil))
+				processor (new PdfContentStreamProcessor listener)
+				resources (.. reader (getPageN page) (getAsDict PdfName/RESOURCES))
+				bytes (ContentByteUtils/getContentBytesForPage reader page)
+				processorExecution (.. processor (processContent bytes resources))
+				] chunks)) 
+		] (map page-to-chunks pages)))
 
-		; RenderListener listener = new RenderListener() {
-		; 	public void renderText(TextRenderInfo arg0) {
-		; 		if (arg0.getText().length() > 1) { texts.add(arg0); }
-		; 	}
+(defn text-chunks-to-lines [chunks]
+	chunks)
 
-		; 	public void renderImage(ImageRenderInfo arg0) {}
-		; 	public void endTextBlock() {}
-		; 	public void beginTextBlock() {}
-		; };
-		; PdfContentStreamProcessor processor = new PdfContentStreamProcessor(listener);
-		; PdfDictionary resourcesDictionary = reader.getPageN(i).getAsDict(PdfName.RESOURCES);
-		; processor.processContent(ContentByteUtils.getContentBytesForPage(reader, i), resourcesDictionary);
-		; return lines
-		; Multimap<Float, TextRenderInfo> b = Multimaps.index(texts, new Function<TextRenderInfo, Float>() {
-		; 	public Float apply(TextRenderInfo arg0) {
-		; 		return arg0.getBaseline().getBoundingRectange().y;
-		; 	}
-		; });
+	; Multimap<Float, TextRenderInfo> b = Multimaps.index(texts, new Function<TextRenderInfo, Float>() {
+	; 	public Float apply(TextRenderInfo arg0) {
+	; 		return arg0.getBaseline().getBoundingRectange().y;
+	; 	}
+	; });
 
-		; for (Float lineY : Ordering.natural().reverse().sortedCopy(b.keySet())) {
-		; 	Ordering<TextRenderInfo> xordering = new Ordering<TextRenderInfo>() {
-		; 		@Override
-		; 		public int compare(TextRenderInfo arg0, TextRenderInfo arg1) {
-		; 			return Ordering.natural().compare(arg1.getBaseline().getBoundingRectange().x,
-		; 			    arg1.getBaseline().getBoundingRectange().x);
-		; 		}
+	; for (Float lineY : Ordering.natural().reverse().sortedCopy(b.keySet())) {
+	; 	Ordering<TextRenderInfo> xordering = new Ordering<TextRenderInfo>() {
+	; 		@Override
+	; 		public int compare(TextRenderInfo arg0, TextRenderInfo arg1) {
+	; 			return Ordering.natural().compare(arg1.getBaseline().getBoundingRectange().x,
+	; 			    arg1.getBaseline().getBoundingRectange().x);
+	; 		}
 
-		; 	};
-		; 	for (TextRenderInfo text : xordering.sortedCopy(b.get(lineY))) {
-		; 		System.out.print(text.getText() + " ");
-		; 	}
-		; 	System.out.println();
-		; }		
-		] reader))
+	; 	};
+	; 	for (TextRenderInfo text : xordering.sortedCopy(b.get(lineY))) {
+	; 		System.out.print(text.getText() + " ");
+	; 	}
+	; 	System.out.println();
+	; }		)
+
 
 (defn -main [username password]
   (let [
@@ -103,4 +110,8 @@
 	  statements-page (statements-page login-page)
 	  statement-years (statement-years statements-page)
 	  statements (zipmap statement-years (map #(statements statements-page %) statement-years))
-	  ] statements))
+	  pdfs (map #(text-chunks-to-lines
+		  			(pdf-statement-to-text-chunks
+			  			(pdf-statement statements-page "2005" %)))
+			  	(statements "2005"))
+	  ] pdfs))
