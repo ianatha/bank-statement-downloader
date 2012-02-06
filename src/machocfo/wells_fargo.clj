@@ -66,7 +66,7 @@
 		pages (range 1 (inc (.getNumberOfPages reader)))
 		page-to-chunks (fn [page]
 			(let [
-				chunks (new java.util.ArrayList)
+				chunks (new java.util.LinkedList)
 				listener (proxy [RenderListener] []
 								(renderText [#^TextRenderInfo chunk] (. chunks add chunk))
 								(beginTextBlock nil)
