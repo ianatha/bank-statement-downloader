@@ -34,13 +34,6 @@
 		#(re-matches #"(19|2[0-9])[0-9][0-9]" %)
 		(map get-text-content (.getAnchors statements-page))))
 
-		; HtmlPage p3 = assertPageHasTitle(wf.index.getAnchorByText("Statements & Documents").click(),
-		; 		regex("Wells Fargo Statements & Documents"));
-
-		; for (HtmlAnchor a1 : p3.getAnchors()) {
-		; 	if (a1.getTextContent().matches("2005")) {
-	; )
-
 (defn statements-per-year-page [statements-page year]
 	(assert-page-title
 		(.. statements-page (getAnchorByText year) (click))
