@@ -43,6 +43,18 @@
 			#(get (re-matches #"(?s)Statement.*([01][0-9]/[01][0-9]/[0-9][0-9]).*\([0-9]*K\)" %) 1)
 			(map #(.getTextContent %) (.getAnchors (statements-per-year-page statements-page year))))))
 
+(defn pdf-statement [statements-page year statement-name]
+	(let [
+		year-page (statements-per-year-page statements-page year)
+		pdf-statement-page (fn []
+			{:post [(instance? com.gargoylesoftware.htmlunit.UnexpectedPage %)]}
+			(.click
+				(first
+					(filter
+						#(re-matches (re-pattern (str "(?s)Statement.*" statement-name ".*")) (.getTextContent %))
+						(.getAnchors year-page)))))
+		] (.getInputStream (pdf-statement-page))))
+
 (defn -main [username password]
   (let [
 	  login-page (login-page username password)
