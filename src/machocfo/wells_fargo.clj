@@ -104,14 +104,22 @@
 	; }		)
 
 
-(defn -main [username password]
+(defn -main [username password year]
   (let [
 	  login-page (login-page username password)
 	  statements-page (statements-page login-page)
 	  statement-years (statement-years statements-page)
-	  statements (zipmap statement-years (map #(statements statements-page %) statement-years))
-	  pdfs (map #(text-chunks-to-lines
-		  			(pdf-statement-to-text-chunks
-			  			(pdf-statement statements-page "2005" %)))
-			  	(statements "2005"))
-	  ] pdfs))
+	  statements-for-year (zipmap
+		  					statement-years
+		  					(map #(statements statements-page %) statement-years))
+	  pdfs (map
+		  	#(pdf-statement statements-page year %)
+		  	(statements-for-year year))
+	  ]
+	  (map
+	  	#(com.google.common.io.Files/write
+		  	(com.google.common.io.ByteStreams/toByteArray (second %1))
+		  	(new java.io.File (format "wf-%s.pdf" (.replaceAll (first %1) "/" "-"))))
+		 (zipmap
+			 (statements-for-year year)
+			 pdfs))))

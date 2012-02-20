@@ -1,14 +1,13 @@
 # machocfo
 
-A set of Clojure-based command-line utilities to export your data
-from your banks website into a parsable JSON.
-
-Currently Supported institutions:
-- Wells Fargo
+A Clojure-based command-line utility that downloads all statements
+for a specificied year from your Wells Fargo bank account.
 
 ## Usage
 
-lein run john_doe password123
+  lein run john_doe password123 2012
+
+In bash, you can prefix your command by a space, to avoid logging it.
 
 ## License
 
